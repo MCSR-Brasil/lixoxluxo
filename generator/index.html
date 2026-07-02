@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCSR Buff/Debuff Command Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <label for="seed-select">Seed:</label>
+            <select id="seed-select"></select>
+        </div>
+
+        <div class="input-section">
+            <label for="debuff-player">Player receiving DEBUFFS:</label>
+            <input type="text" id="debuff-player" placeholder="e.g. epik_runs" autocomplete="off">
+            <p class="warning">Names are case-sensitive.</p>
+        </div>
+
+        <div class="templates-section">
+            <h2>Select Active Buffs &amp; Debuffs</h2>
+            <div class="template-grid">
+                <div class="template-column buffs">
+                    <h3>Buffs (applied to the OTHER player)</h3>
+                    <div id="buff-list"></div>
+                </div>
+                <div class="template-column debuffs">
+                    <h3>Debuffs (applied to the debuff player)</h3>
+                    <div id="debuff-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-generate" onclick="generate()">Generate Commands</button>
+
+        <div class="output-section">
+            <h2>Generated Command</h2>
+            <p class="hint">Paste this into MCSR Ranked's "Run commands on world start" field</p>
+            <textarea class="output-box" id="output" readonly></textarea>
+            <button class="btn-copy" onclick="copyOutput()">Copiar</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
