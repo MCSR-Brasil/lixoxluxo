@@ -152,6 +152,14 @@ body {
   line-height: 1;
 }
 
+.history-title-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  vertical-align: middle;
+}
+
 .card-icon {
   font-size: 72px;
   line-height: 1;
@@ -280,25 +288,7 @@ body {
   padding-bottom: 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-
-.history-clear {
-  background: none;
-  border: 2px solid #fff4;
-  color: #fff8;
-  font-family: var(--font-mc);
-  font-size: 16px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  line-height: 1;
-  transition: background 0.15s, color 0.15s;
-}
-
-.history-clear:hover {
-  background: #fff2;
-  color: #fff;
+  gap: 8px;
 }
 
 .history-list {

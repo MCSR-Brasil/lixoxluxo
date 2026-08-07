@@ -7,17 +7,82 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <aside class="info-sidebar">
+        <h3>How to use</h3>
+        <ul>
+            <li><strong>Seed:</strong> pick the seed that will be played.</li>
+            <li><strong>Players:</strong> type the player name for buffs and/or debuffs.</li>
+            <li><strong>Give to all:</strong> overrides the player names and applies to <code>@a</code>.</li>
+            <li><strong>Select cards:</strong> check the buffs/debuffs you want.</li>
+            <li><strong>Generate:</strong> copy the command and paste into MCSR Ranked.</li>
+        </ul>
+        <h3>Seeds</h3>
+        <p>Some buffs/debuffs (like compasses and stronghold markers) need seed-specific coordinates. Add them here with spaces between X, Y and Z, e.g. <code>-389 28 1488</code>.</p>
+
+        <div class="seed-form">
+            <div class="form-section">
+                <h4>Seed Info</h4>
+                <label for="seed-name">Name <span class="required">*</span></label>
+                <input type="text" id="seed-name" placeholder="e.g. RuinedPortal1" autocomplete="off">
+                <label for="seed-overworld-seed">Overworld Seed</label>
+                <input type="text" id="seed-overworld-seed" placeholder="e.g. 12345" autocomplete="off">
+                <label for="seed-nether-seed">Nether Seed</label>
+                <input type="text" id="seed-nether-seed" placeholder="e.g. 12345" autocomplete="off">
+                <label for="seed-end-seed">End Seed</label>
+                <input type="text" id="seed-end-seed" placeholder="e.g. 12345" autocomplete="off">
+                <label for="seed-rng-seed">RNG Seed</label>
+                <input type="text" id="seed-rng-seed" placeholder="e.g. 12345" autocomplete="off">
+            </div>
+            <div class="form-section">
+                <h4>Coordinates</h4>
+                <label for="seed-sh1">SH1 (OW) <span class="required">*</span></label>
+                <input type="text" id="seed-sh1" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-sh2">SH2 (OW) <span class="required">*</span></label>
+                <input type="text" id="seed-sh2" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-sh3">SH3 (OW) <span class="required">*</span></label>
+                <input type="text" id="seed-sh3" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-fortress">Fortress (Nether) <span class="required">*</span></label>
+                <input type="text" id="seed-fortress" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-bastion">Bastion (Nether) <span class="required">*</span></label>
+                <input type="text" id="seed-bastion" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-nether-spawn">Nether Spawn</label>
+                <input type="text" id="seed-nether-spawn" placeholder="X Y Z" autocomplete="off">
+                <label for="seed-second-overworld">Second OW Spawn</label>
+                <input type="text" id="seed-second-overworld" placeholder="X Y Z" autocomplete="off">
+            </div>
+            <button onclick="addSeed()">Save Seed</button>
+        </div>
+
+        <ul id="seed-list" class="seed-list"></ul>
+        <p class="warning">Player names are case-sensitive.</p>
+    </aside>
+
     <div class="container">
         <div class="input-section">
             <label for="seed-select">Seed:</label>
             <select id="seed-select"></select>
         </div>
 
-        <div class="input-section">
-            <label for="debuff-player">Player receiving DEBUFFS:</label>
-            <input type="text" id="debuff-player" placeholder="e.g. epik_runs" autocomplete="off">
-            <p class="warning">Names are case-sensitive.</p>
+        <div class="player-grid">
+            <div class="input-section players buffs">
+                <label for="buff-player"><span class="dot dot-buff"></span>Player receiving BUFFS</label>
+                <input type="text" id="buff-player" placeholder="e.g. epik_runs" autocomplete="off">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="buff-all">
+                    <label for="buff-all">Give buffs to all players</label>
+                </div>
+            </div>
+
+            <div class="input-section players debuffs">
+                <label for="debuff-player"><span class="dot dot-debuff"></span>Player receiving DEBUFFS</label>
+                <input type="text" id="debuff-player" placeholder="e.g. epik_runs" autocomplete="off">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="debuff-all">
+                    <label for="debuff-all">Give debuffs to all players</label>
+                </div>
+            </div>
         </div>
+        <p class="warning">Player names are case-sensitive.</p>
 
         <div class="templates-section">
             <h2>Select Active Buffs &amp; Debuffs</h2>
@@ -43,6 +108,30 @@
         </div>
 
     </div>
+
+    <aside class="seed-info-sidebar">
+        <h3>Selected Seed</h3>
+        <div id="seed-info">
+            <p class="seed-info-name"><strong>Name:</strong> <span id="seed-info-name">-</span></p>
+            <p class="seed-info-section-title">Seeds</p>
+            <ul>
+                <li><strong>Overworld:</strong> <code id="seed-info-overworld-seed">-</code></li>
+                <li><strong>Nether:</strong> <code id="seed-info-nether-seed">-</code></li>
+                <li><strong>End:</strong> <code id="seed-info-end-seed">-</code></li>
+                <li><strong>RNG:</strong> <code id="seed-info-rng-seed">-</code></li>
+            </ul>
+            <p class="seed-info-section-title">Coordinates</p>
+            <ul>
+                <li><strong>SH1 (OW):</strong> <code id="seed-info-sh1">-</code></li>
+                <li><strong>SH2 (OW):</strong> <code id="seed-info-sh2">-</code></li>
+                <li><strong>SH3 (OW):</strong> <code id="seed-info-sh3">-</code></li>
+                <li><strong>Fortress (Nether):</strong> <code id="seed-info-fortress">-</code></li>
+                <li><strong>Bastion (Nether):</strong> <code id="seed-info-bastion">-</code></li>
+                <li><strong>Nether Spawn:</strong> <code id="seed-info-nether-spawn">-</code></li>
+                <li><strong>Second OW Spawn:</strong> <code id="seed-info-second-overworld">-</code></li>
+            </ul>
+        </div>
+    </aside>
 
     <script src="script.js"></script>
 </body>
