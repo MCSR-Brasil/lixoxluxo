@@ -317,7 +317,10 @@ const BUFFS = [
         name: 'Piglins Amigos',
         description: "Tira a arma dos piglins e zombified piglins, colocando uma rosa na mao principal. Preserva ouro que estiverem segurando.",
         commands: [
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:piglin] at @s unless data entity @s HandItems[0] {id:'minecraft:gold_ingot'} run data modify entity @s HandItems[0] set value {id:'minecraft:poppy',Count:1b}\"} replace"
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:piglin,nbt=!{HandItems:[{id:'minecraft:gold_ingot'}]}] run data modify entity @s HandItems[0] set value {id:'minecraft:poppy',Count:1b}\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:zombified_piglin,nbt=!{HandItems:[{id:'minecraft:gold_ingot'}]}] run data modify entity @s HandItems[0] set value {id:'minecraft:poppy',Count:1b}\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"effect give @e[type=minecraft:piglin] minecraft:weakness 1 10 true\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"effect give @e[type=minecraft:zombified_piglin] minecraft:weakness 1 10 true\"} replace"
         ]
     },
     {
@@ -464,10 +467,10 @@ const DEBUFFS = [
         name: 'Sem Armadura',
         description: "Bloqueia os 4 slots de armadura.",
         commands: [
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.head minecraft:knowledge_book 1\"} replace",
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.chest minecraft:knowledge_book 1\"} replace",
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.legs minecraft:knowledge_book 1\"} replace",
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.feet minecraft:knowledge_book 1\"} replace"
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.head minecraft:air\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.chest minecraft:air\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.legs minecraft:air\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"replaceitem entity {SELECTOR} armor.feet minecraft:air\"} replace"
         ]
     },
     {
@@ -591,8 +594,8 @@ const DEBUFFS = [
         description: "Sempre que o jogador acerta um mob, ele recebe dano de volta, como se todos os mobs tivessem o encantamento Throns.",
         commands: [
             "scoreboard objectives add test minecraft.custom:minecraft.damage_dealt",
-            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @a[scores={test=1..}] run effect give @s minecraft:instant_damage 1 0\"} replace",
-            "setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @a[scores={test=1..}] run effect give @s minecraft:instant_health 1 0\"} replace",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @a[scores={test=1..}] run effect give @s minecraft:instant_health 1 0\"} replace",
+            "setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @a[scores={test=1..}] run effect give @s minecraft:instant_damage 1 0\"} replace",
             "setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @a[scores={test=1..}] run scoreboard players set @s test 0\"} replace"
         ]
     },
@@ -601,8 +604,9 @@ const DEBUFFS = [
         name: 'Piglins Raivosos',
         description: "Faz todos os piglins e zombified piglins ficarem permanentemente com raiva do jogador, mesmo com armadura.",
         commands: [
-           "execute at {SELECTOR} run setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:zombified_piglin] run data modify entity @s AngryAt set from entity @p UUID\"} replace",
-           "execute at {SELECTOR} run setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:piglin] run data modify entity @s Brain.memories.'minecraft:angry_at'.value set from entity @p UUID\"} replace"
+           "execute at {SELECTOR} run setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:zombified_piglin] at @s run data modify entity @s AngryAt set from entity @p UUID\"} replace",
+           "execute at {SELECTOR} run setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:zombified_piglin] run data modify entity @s AngerTime set value 400\"} replace",
+           "execute at {SELECTOR} run setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"execute as @e[type=minecraft:piglin] at @s run data modify entity @s Brain.memories.minecraft:angry_at.value set from entity @p UUID\"} replace"
         ]
     },
     {
