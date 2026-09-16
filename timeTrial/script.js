@@ -188,7 +188,8 @@ function saveConfig() {
         advancementReward: document.getElementById("advancement-reward").value,
         mobReward: document.getElementById("mob-reward").value,
         previewTime: document.getElementById("preview-time").value,
-        previewSounds: document.getElementById("preview-sounds").checked
+        previewSounds: document.getElementById("preview-sounds").checked,
+        creativeAfterLoss: document.getElementById("creative-after-loss").checked
     }));
 }
 
@@ -206,6 +207,7 @@ function loadConfig() {
         document.getElementById("mob-reward").value = config.mobReward || 10;
         document.getElementById("preview-time").value = config.previewTime ?? 15;
         document.getElementById("preview-sounds").checked = config.previewSounds !== false;
+        document.getElementById("creative-after-loss").checked = Boolean(config.creativeAfterLoss);
     } catch (error) {
         localStorage.removeItem("timeTrialConfig");
     }
@@ -262,6 +264,7 @@ function generate() {
     const mobReward = separateRewards ? Math.max(1, Number.parseInt(document.getElementById("mob-reward").value, 10) || 10) : bonusSeconds;
     const previewSeconds = Math.max(0, Number.parseInt(document.getElementById("preview-time").value, 10) || 0);
     const previewSounds = document.getElementById("preview-sounds").checked;
+    const creativeAfterLoss = document.getElementById("creative-after-loss").checked;
     const players = "@p";
     const advancementsEnabled = document.getElementById("mode-advancements").checked;
     const killsEnabled = document.getElementById("mode-kills").checked;
@@ -295,11 +298,11 @@ function generate() {
         `/scoreboard players set ${players} a 0`,
         `/scoreboard players set ${players} m 0`,
         `/scoreboard players set ${players} c 0`,
-        `/scoreboard players set ${players} w ${previewSeconds * 20}`,
-        "/scoreboard players set # s 20",
-        `/tellraw ${players} ${intro}`,
-        `/execute at ${players} run fill ~-1 ~30 ~-1 ~1 ~33 ~1 barrier hollow`,
-        `/execute at ${players} run tp ${players} ~ ~31 ~`
+        `/scoreboard players set ${players} w -1`,
+        `/execute as ${players} store result score @s r run speedrunigt get rta second`,
+        `/execute as ${players} run scoreboard players operation @s d = @s r`,
+        `/scoreboard players add ${players} d ${previewSeconds}`,
+        `/tellraw ${players} ${intro}`
     ];
 
     const events = [];
@@ -323,21 +326,24 @@ function generate() {
         `execute as ${players} store result score @s r run speedrunigt get rta second`,
         `scoreboard players remove ${withSelectorArgs(players, "scores={c=1..}")} c 1`,
         `scoreboard players remove ${withSelectorArgs(players, "scores={w=1..},tag=!R")} w 1`,
-        `execute as ${players} run scoreboard players operation @s s = @s w`,
-        `scoreboard players add ${players} s 19`,
-        `execute as ${players} run scoreboard players operation @s s /= # s`,
-        `execute as ${withSelectorArgs(players, "scores={w=1..},tag=!R")} run title @s actionbar {\"text\":\"${smallCaps("Starting in: ")}\",\"color\":\"green\",\"bold\":true,\"extra\":[{\"score\":{\"name\":\"@s\",\"objective\":\"s\"},\"color\":\"white\",\"bold\":false},{\"text\":\"s\",\"color\":\"gray\",\"bold\":false}]}`,
+        `execute as ${players} run scoreboard players operation @s s = @s d`,
+        `execute as ${players} run scoreboard players operation @s s -= @s r`,
+        `execute as ${withSelectorArgs(players, "scores={s=1..},tag=!R,tag=!L")} run title @s actionbar {\"text\":\"${smallCaps("Starting in: ")}\",\"color\":\"green\",\"bold\":true,\"extra\":[{\"score\":{\"name\":\"@s\",\"objective\":\"s\"},\"color\":\"white\",\"bold\":false},{\"text\":\"s\",\"color\":\"gray\",\"bold\":false}]}`,
         ...(previewSounds ? [
-            `execute as ${withSelectorArgs(players, "scores={s=1..3,w=1..,c=..0},tag=!R")} at @s run playsound block.note_block.hat master @s ~ ~ ~ .7 1`,
+            `execute as ${withSelectorArgs(players, "scores={s=1..3,c=..0},tag=!R,tag=!L")} at @s run playsound block.note_block.hat master @s ~ ~ ~ .7 1`,
             { command: `scoreboard players set ${players} c 20`, conditional: true }
         ] : []),
-        `execute at ${withSelectorArgs(players, "scores={w=0},tag=!R")} run tp ${players} ~ ~-31 ~`,
-        `execute at ${withSelectorArgs(players, "scores={w=0},tag=!R")} run fill ~-1 ~30 ~-1 ~1 ~33 ~1 air`,
-        `execute as ${withSelectorArgs(players, "scores={w=0},tag=!R")} run scoreboard players operation @s b = @s r`,
-        `execute as ${withSelectorArgs(players, "scores={w=0},tag=!R")} run scoreboard players operation @s d = @s r`,
-        `scoreboard players add ${withSelectorArgs(players, "scores={w=0},tag=!R")} d ${startSeconds}`,
-        `scoreboard players set ${withSelectorArgs(players, "scores={w=0},tag=!R")} c 0`,
-        `tag ${withSelectorArgs(players, "scores={w=0},tag=!R")} add R`,
+        `execute at ${withSelectorArgs(players, "scores={s=1..},tag=!R,tag=!L,tag=!P")} run fill ~-1 ~30 ~-1 ~1 ~33 ~1 barrier hollow`,
+        `execute at ${withSelectorArgs(players, "scores={s=1..},tag=!R,tag=!L,tag=!P")} run tp ${players} ~ ~31 ~`,
+        `tag ${withSelectorArgs(players, "scores={s=1..},tag=!R,tag=!L,tag=!P")} add P`,
+        `execute at ${withSelectorArgs(players, "scores={s=..0},tag=P")} run tp ${players} ~ ~-31 ~`,
+        `execute at ${withSelectorArgs(players, "scores={s=..0},tag=P")} run fill ~-1 ~30 ~-1 ~1 ~33 ~1 air`,
+        `tag ${withSelectorArgs(players, "scores={s=..0},tag=P")} remove P`,
+        `execute as ${withSelectorArgs(players, "scores={s=..0},tag=!R,tag=!L")} run scoreboard players operation @s b = @s r`,
+        `execute as ${withSelectorArgs(players, "scores={s=..0},tag=!R,tag=!L")} run scoreboard players operation @s d = @s r`,
+        `scoreboard players add ${withSelectorArgs(players, "scores={s=..0},tag=!R,tag=!L")} d ${startSeconds}`,
+        `scoreboard players set ${withSelectorArgs(players, "scores={s=..0},tag=!R,tag=!L")} c 0`,
+        `tag ${withSelectorArgs(players, "scores={s=..0},tag=!R,tag=!L")} add R`,
         { command: `scoreboard players set ${players} w -1`, conditional: true },
         `execute as ${players} run scoreboard players operation @s s = @s d`,
         `execute as ${players} run scoreboard players operation @s s -= @s r`,
@@ -349,7 +355,17 @@ function generate() {
         { command: `execute as ${players} run scoreboard players operation @s s -= @s b`, conditional: true },
         { command: `title ${players} title {\"text\":\"${smallCaps("Time's up!")}\",\"color\":\"red\",\"bold\":true}`, conditional: true },
         { command: `execute as ${players} run tellraw @s [{\"text\":\"\\n${smallCaps("Time Trial Results")}\",\"color\":\"gold\",\"bold\":true},{\"text\":\"\\n${smallCaps("Time survived: ")}\",\"color\":\"green\"},{\"score\":{\"name\":\"@s\",\"objective\":\"s\"},\"color\":\"white\"},{\"text\":\"s\\n${smallCaps("Advancements: ")}\",\"color\":\"green\"},{\"score\":{\"name\":\"@s\",\"objective\":\"a\"},\"color\":\"white\"},{\"text\":\"\\n${smallCaps("Mobs: ")}\",\"color\":\"aqua\"},{\"score\":{\"name\":\"@s\",\"objective\":\"m\"},\"color\":\"white\"},{\"text\":\"\\n\"}]`, conditional: true },
-        { command: `tag ${players} remove R`, conditional: true }
+        ...(creativeAfterLoss ? [
+            { command: `scoreboard players set ${players} w 100`, conditional: true },
+            { command: `tag ${players} add L`, conditional: true }
+        ] : []),
+        { command: `tag ${players} remove R`, conditional: true },
+        ...(creativeAfterLoss ? [
+            `execute as ${withSelectorArgs(players, "scores={w=0},tag=L")} run gamemode creative @s`,
+            { command: `tellraw ${players} {\"text\":\"${smallCaps("You are now in Creative mode.")}\",\"color\":\"green\"}`, conditional: true },
+            { command: `scoreboard players set ${players} w -1`, conditional: true },
+            { command: `tag ${players} remove L`, conditional: true }
+        ] : [])
     ]);
 
     events.forEach(event => {
@@ -443,6 +459,7 @@ document.querySelectorAll(".mode-card input").forEach(input => input.addEventLis
 document.querySelectorAll("#start-time, #bonus-time, #advancement-reward, #mob-reward, #preview-time").forEach(input => input.addEventListener("input", handleCommandSettingChange));
 document.getElementById("separate-rewards").addEventListener("change", updateAdvancedState);
 document.getElementById("preview-sounds").addEventListener("change", handleCommandSettingChange);
+document.getElementById("creative-after-loss").addEventListener("change", handleCommandSettingChange);
 document.getElementById("show-limit").addEventListener("change", () => {
     updateCharacterDebug();
     saveConfig();
