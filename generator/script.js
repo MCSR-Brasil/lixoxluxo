@@ -675,6 +675,14 @@ const DEBUFFS = [
     },
 ];
 
+const WORLDS = [
+    {
+        id: 'skyblock',
+        name: 'Skyblock',
+        description: "Applies the full Skyblock world setup from skyblockfinal1.txt (spawn, island, lava+ice kit, kill/teleport loop)."
+    }
+];
+
 // =====================================================
 // UI Rendering
 // =====================================================
@@ -725,6 +733,24 @@ function renderTemplates() {
             `;
             targetList.appendChild(div);
         });
+    });
+}
+
+function renderWorlds() {
+    const worldList = document.getElementById("world-list");
+    if (!worldList) return;
+    WORLDS.forEach(w => {
+        const div = document.createElement("div");
+        div.className = "template-item";
+        const info = w.description
+            ? `<span class="info-icon">i<span class="tooltip">${escapeHtml(w.description)}</span></span>`
+            : "";
+        div.innerHTML = `
+            <input type="checkbox" id="tmpl-world-${w.id}">
+            <label for="tmpl-world-${w.id}">${escapeHtml(w.name)}</label>
+            ${info}
+        `;
+        worldList.appendChild(div);
     });
 }
 
@@ -814,6 +840,17 @@ function generate() {
     else if (debuffPlayer) debuffSelector = `@a[name=${debuffPlayer}]`;
 
     const allCommands = ["/gamerule sendCommandFeedback false"];
+
+    const selectedWorlds = WORLDS.filter(w => {
+        const checkbox = document.getElementById(`tmpl-world-${w.id}`);
+        return checkbox && checkbox.checked;
+    });
+    selectedWorlds.forEach(w => {
+        if (typeof SKYBLOCK_COMMAND !== 'undefined') {
+            allCommands.push(SKYBLOCK_COMMAND);
+        }
+    });
+
     let buffOffset = 0;
     let debuffOffset = 0;
 
@@ -878,6 +915,7 @@ function copyOutput() {
 // Initialize on load
 renderSeeds();
 renderSeedList();
+renderWorlds();
 renderTemplates();
 
 document.getElementById("seed-select").addEventListener("change", updateSeedInfoSidebar);
