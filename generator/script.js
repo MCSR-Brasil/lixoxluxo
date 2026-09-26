@@ -679,7 +679,18 @@ const WORLDS = [
     {
         id: 'skyblock',
         name: 'Skyblock',
-        description: "Applies the full Skyblock world setup from skyblockfinal1.txt (spawn, island, lava+ice kit, kill/teleport loop)."
+        description: "Applies the full Skyblock world setup from skyblockfinal1.txt (spawn, island, lava+ice kit, kill/teleport loop).",
+        raw: true
+    },
+    {
+        id: 'fishing_apples',
+        name: 'Vara Dourada',
+        description: "Quando um jogador dropa uma vara de pesca, ele recebe 5 maçãs douradas encantadas.",
+        commands: [
+            "scoreboard objectives add fishingDrop minecraft.dropped:minecraft.fishing_rod",
+            "setblock {COORDS} minecraft:repeating_command_block[facing=up]{auto:1b,Command:\"give @a[scores={fishingDrop=1}] minecraft:enchanted_golden_apple 10\"} replace",
+            "setblock {COORDS} minecraft:chain_command_block[facing=up]{auto:1b,Command:\"scoreboard players set @a[scores={fishingDrop=1}] fishingDrop 2\"} replace"
+        ]
     }
 ];
 
@@ -830,14 +841,14 @@ function generate() {
     const seedId = document.getElementById("seed-select").value;
     const seed = SEEDS.find(s => s.id === seedId) || null;
 
-    // Checkbox supersedes player input. Empty input + no checkbox = skip that side.
+    // Checkbox supersedes player input. Empty input defaults to all players.
     let buffSelector = null;
-    if (buffAll) buffSelector = "@a";
-    else if (buffPlayer) buffSelector = `@a[name=${buffPlayer}]`;
+    if (buffAll || !buffPlayer) buffSelector = "@a";
+    else buffSelector = `@a[name=${buffPlayer}]`;
 
     let debuffSelector = null;
-    if (debuffAll) debuffSelector = "@a";
-    else if (debuffPlayer) debuffSelector = `@a[name=${debuffPlayer}]`;
+    if (debuffAll || !debuffPlayer) debuffSelector = "@a";
+    else debuffSelector = `@a[name=${debuffPlayer}]`;
 
     const allCommands = ["/gamerule sendCommandFeedback false"];
 
@@ -845,10 +856,27 @@ function generate() {
         const checkbox = document.getElementById(`tmpl-world-${w.id}`);
         return checkbox && checkbox.checked;
     });
+    let worldOffset = -50;
     selectedWorlds.forEach(w => {
-        if (typeof SKYBLOCK_COMMAND !== 'undefined') {
-            allCommands.push(SKYBLOCK_COMMAND);
+        if (w.raw) {
+            if (typeof SKYBLOCK_COMMAND !== 'undefined') {
+                allCommands.push(SKYBLOCK_COMMAND);
+            }
+            return;
         }
+        const xOffset = worldOffset;
+        let yIdx = 0;
+        (w.commands || []).forEach(cmd => {
+            if (!cmd) return;
+            cmd = resolveSeedPlaceholders(cmd, seed);
+            if (cmd.includes("{COORDS}")) {
+                allCommands.push(cmd.replace(/\{COORDS\}/g, `~${xOffset} ${1 + yIdx} ~0`));
+                yIdx++;
+            } else {
+                allCommands.push(cmd);
+            }
+        });
+        if (yIdx > 0) worldOffset--;
     });
 
     let buffOffset = 0;
